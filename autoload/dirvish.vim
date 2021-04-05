@@ -75,7 +75,7 @@ func! s:list_dir(dir) abort
   let dir_esc = escape(substitute(a:dir,'\[','[[]','g'), ',;*?{}^$\')
   let paths = s:globlist(dir_esc, '*')
   "Append dot-prefixed files. globpath() cannot do both in 1 pass.
-  let paths = paths + s:globlist(dir_esc, '.[^.]*')
+  let paths = [ a:dir . '..' ] + paths + s:globlist(dir_esc, '.[^.]*')
 
   if s:rel && !s:eq(a:dir, s:parent_dir(getcwd()))
     return map(paths, "fnamemodify(v:val, ':p:.')")  " Avoid blank CWD.
