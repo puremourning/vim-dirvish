@@ -77,6 +77,9 @@ func! s:list_dir(dir) abort
   "Append dot-prefixed files. globpath() cannot do both in 1 pass.
   let paths = [ a:dir . '..' ] + paths + s:globlist(dir_esc, '.[^.]*')
 
+  "Sort the paths to put directories first
+  call sort(paths, { a, b -> isdirectory( b ) - isdirectory( a ) })
+
   if s:rel && !s:eq(a:dir, s:parent_dir(getcwd()))
     return map(paths, "fnamemodify(v:val, ':p:.')")  " Avoid blank CWD.
   else
