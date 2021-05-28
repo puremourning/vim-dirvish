@@ -70,15 +70,45 @@ func! s:globlist(dir_esc, pat) abort
 endf
 endif
 
+func! s:sort_by_dir_then_hidden( a, b ) abort
+    let a = a:a
+    let b = a:b
+
+    let a_directory = isdirectory( a )
+    let b_directory = isdirectory( b )
+
+    if a_directory != b_directory
+        return a_directory ? -1 : 1
+    endif
+
+    " either both directories or both not directories, compare the file names to
+    " sort hidden first
+    let a = fnamemodify( a, ':t' )
+    let b = fnamemodify( b, ':t' )
+
+    let a_hidden = a[ 0 ] == '.'
+    let b_hidden = b[ 0 ] == '.'
+
+    if a_hidden != b_hidden
+        return a_hidden ? -1 : 1
+    endif
+
+    " either both hidden or both not hidden, compare the strings
+    return a ==? b ? 0 : ( a <? b ? -1 : 1 )
+endfunction
+
 func! s:list_dir(dir) abort
   " Escape for globpath().
   let dir_esc = escape(substitute(a:dir,'\[','[[]','g'), ',;*?{}^$\')
   let paths = s:globlist(dir_esc, '*')
   "Append dot-prefixed files. globpath() cannot do both in 1 pass.
-  let paths = [ a:dir . '..' ] + paths + s:globlist(dir_esc, '.[^.]*')
+  let paths = paths + s:globlist(dir_esc, '.*')
+
+  " Reomve the '.' entry
+  call filter( paths, "fnamemodify( v:val, ':t' ) !=# '.'" )
 
   "Sort the paths to put directories first
-  call sort(paths, { a, b -> isdirectory( b ) - isdirectory( a ) })
+  call sort(paths, function( 's:sort_by_dir_then_hidden' ) )
 
   if s:rel && !s:eq(a:dir, s:parent_dir(getcwd()))
     return map(paths, "fnamemodify(v:val, ':p:.')")  " Avoid blank CWD.
