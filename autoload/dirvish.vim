@@ -110,10 +110,10 @@ func! s:list_dir(dir) abort
   "Sort the paths to put directories first
   call sort(paths, function( 's:sort_by_dir_then_hidden' ) )
 
-  if s:rel && !s:eq(a:dir, s:parent_dir(getcwd()))
-    return map(paths, "fnamemodify(v:val, ':p:.')")  " Avoid blank CWD.
+  if s:rel && !s:eq(a:dir, s:parent_dir(getcwd())) " Avoid blank CWD.
+    return [ paths[0] .. '/' ] + map(paths[1:], "fnamemodify(v:val, ':p:.')")  
   else
-    return map(paths, "fnamemodify(v:val, ':p')")
+    return [ paths[0] .. '/' ] + map(paths[1:], "fnamemodify(v:val, ':p')")
   endif
 endf
 
