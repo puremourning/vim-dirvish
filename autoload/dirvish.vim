@@ -271,7 +271,7 @@ endf
 
 func! s:win_init() abort
   let w:dirvish = extend(get(w:, 'dirvish', {}), b:dirvish, 'keep')
-  setlocal nowrap cursorline nocursorcolumn colorcolumn=0
+  setlocal nowrap cursorline nocursorcolumn colorcolumn=0 nospell
 
   if has('conceal')
     setlocal concealcursor=nvc conceallevel=2
